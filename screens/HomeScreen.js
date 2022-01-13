@@ -1,10 +1,12 @@
 import { SafeAreaView, StyleSheet, Text, View } from 'react-native'
+import ChatContainer from '../components/ChatContainer'
 import HomeHeader from '../components/HomeHeader'
 
 const HomeScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <HomeHeader />
+      <ChatContainer />
     </SafeAreaView>
   )
 }
