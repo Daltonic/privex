@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   wrapper: {
-    backgroundColor: 'rgba(0,0,0,0.92)',
+    backgroundColor: 'rgba(18, 38, 67, 0.96);',
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
