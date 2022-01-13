@@ -11,7 +11,7 @@ const screenOption = {
 
 const App = () => (
   <NavigationContainer>
-    <Stack.Navigator initialRouteName="ChatScreen" screenOptions={screenOption}>
+    <Stack.Navigator initialRouteName="HomeScreen" screenOptions={screenOption}>
       <Stack.Screen name="HomeScreen" component={HomeScreen} />
       <Stack.Screen name="LoginScreen" component={LoginScreen} />
       <Stack.Screen name="ChatScreen" component={ChatScreen} />
