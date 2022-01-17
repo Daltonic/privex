@@ -2,6 +2,7 @@ import React from 'react'
 import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native'
 import { Avatar, Text } from 'react-native-elements'
 import { TouchableOpacity } from 'react-native-web'
+import { useGlobalState } from '../store'
 
 const ChatContainer = () => {
   return (
@@ -12,45 +13,48 @@ const ChatContainer = () => {
   )
 }
 
-const Stories = () => (
-  <ScrollView
-    style={[
-      styles.shadow,
-      {
-        flexGrow: 0,
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        top: 0,
-        paddingVertical: 15,
-      },
-    ]}
-    horizontal={true}
-    showsHorizontalScrollIndicator={false}
-  >
-    {Array(20)
-      .fill()
-      .map((item, i) => (
-        <View key={i} style={{ alignItems: 'center', marginHorizontal: 5 }}>
-          <Avatar
-            size={60}
-            rounded
-            source={{
-              uri: 'https://d2qp0siotla746.cloudfront.net/img/use-cases/profile-picture/template_3.jpg',
-            }}
-          />
-          <Text style={{ fontWeight: 600 }}>Jany Lee</Text>
+const Stories = () => {
+  const [stories] = useGlobalState('stories')
+
+  return (
+    <ScrollView
+      style={[
+        styles.shadow,
+        {
+          flexGrow: 0,
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          top: 0,
+          paddingVertical: 15,
+        },
+      ]}
+      horizontal={true}
+      showsHorizontalScrollIndicator={false}
+    >
+      {stories.map((story) => (
+        <View
+          key={story.id}
+          style={{ alignItems: 'center', marginHorizontal: 5 }}
+        >
+          <Avatar size={60} rounded source={{ uri: story.avatar }} />
+          <Text style={{ fontWeight: 600 }}>{story.fullname}</Text>
         </View>
       ))}
-  </ScrollView>
-)
+    </ScrollView>
+  )
+}
 
 const ChatList = () => {
   const viewport = useWindowDimensions()
 
   return (
     <ScrollView
-      style={{ maxHeight: viewport.height.toFixed(0) - 194, marginTop: 50, paddingTop: 15 }}
+      style={{
+        maxHeight: viewport.height.toFixed(0) - 194,
+        marginTop: 50,
+        paddingTop: 15,
+      }}
       showsVerticalScrollIndicator={false}
     >
       {Array(15)
@@ -119,6 +123,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 3,
     backgroundColor: 'white',
-    zIndex: 9999
+    zIndex: 9999,
   },
 })
