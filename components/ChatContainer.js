@@ -50,7 +50,7 @@ const ChatList = () => {
 
   return (
     <ScrollView
-      style={{ maxHeight: viewport.height.toFixed(0) - 189, marginTop: 50, paddingTop: 15 }}
+      style={{ maxHeight: viewport.height.toFixed(0) - 194, marginTop: 50, paddingTop: 15 }}
       showsVerticalScrollIndicator={false}
     >
       {Array(15)
