@@ -1,14 +1,40 @@
 import { StyleSheet, TouchableOpacity, View } from 'react-native'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import { Avatar, Text } from 'react-native-elements'
+import { getAuth, signOut } from '../firebase'
 import { setGlobalState } from '../store'
+import { CometChat } from '@cometchat-pro/react-native-chat'
 
 const HomeHeader = () => {
+  const PLACEHOLDER_AVATAR =
+    'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'
+
+  const auth = getAuth()
+
+  const signOutUser = async () => {
+    try {
+      await signOut(auth).then(() => {
+        CometChat.logout()
+          .then(() => console.log('Logout completed successfully'))
+          .catch((error) =>
+            console.log('Logout failed with exception:', { error })
+          )
+      })
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   return (
     <View style={{ paddingVertical: 15, paddingHorizontal: 30 }}>
       <View style={styles.container}>
-        <TouchableOpacity activeOpacity={0.5}>
-          <Avatar rounded source={require('../assets/avatar.jpg')} />
+        <TouchableOpacity onPress={signOutUser} activeOpacity={0.5}>
+          <Avatar
+            rounded
+            source={{
+              uri: auth?.currentUser?.photoURL || PLACEHOLDER_AVATAR,
+            }}
+          />
         </TouchableOpacity>
 
         <View

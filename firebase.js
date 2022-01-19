@@ -6,6 +6,8 @@ import {
   signInWithEmailAndPassword,
   updateProfile,
   signOut,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from 'firebase/auth'
 import {
   getFirestore,
@@ -34,6 +36,8 @@ const firebaseConfig = {
   appId: '1:83238234696:web:0facde5c2fba03c400467d',
 }
 
+const provider = new GoogleAuthProvider()
+
 if (!getApps().length) initializeApp(firebaseConfig)
 
 export {
@@ -41,6 +45,8 @@ export {
   onAuthStateChanged,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  signInWithPopup,
+  provider,
   updateProfile,
   signOut,
   collection,

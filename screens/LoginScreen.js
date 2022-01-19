@@ -7,8 +7,53 @@ import {
   View,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { provider, signInWithPopup, getAuth } from '../firebase'
+import { CONSTANTS } from '../CONSTANTS'
+import { CometChat } from '@cometchat-pro/react-native-chat'
 
 const LoginScreen = () => {
+  const signUpWithCometChat = (data) => {
+    const authKey = CONSTANTS.Auth_Key
+    const user = new CometChat.User(data.uid)
+    user.setName(data.displayName)
+    user.setAvatar(data.photoURL)
+    CometChat.createUser(user, authKey)
+      .then((res) => {
+        console.log('User signed up...', res)
+        CometChat.login(data.uid, authKey)
+          .then((u) => console.log(u))
+          .catch((error) => console.log(error))
+      })
+      .catch((error) => {
+        console.log(error)
+        alert(error.message)
+      })
+  }
+
+  const loginWithCometChat = (data) => {
+    const authKey = CONSTANTS.Auth_Key
+    CometChat.login(data.uid, authKey)
+      .then((u) => console.log('User Logged in...', u))
+      .catch((error) => {
+        if (error.code === 'ERR_UID_NOT_FOUND') {
+          signUpWithCometChat(data)
+        } else {
+          console.log(error)
+        }
+      })
+  }
+
+  const signInPrompt = () => {
+    const auth = getAuth()
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        const user = result.user
+        console.log(user)
+        loginWithCometChat(user)
+      })
+      .catch((error) => console.log(error))
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <ImageBackground
@@ -24,7 +69,9 @@ const LoginScreen = () => {
           </Text>
 
           <Pressable titleSize={20} style={styles.button}>
-            <Text style={styles.buttonText}>Log In with Google</Text>
+            <Text style={styles.buttonText} onPress={signInPrompt}>
+              Log In with Google
+            </Text>
           </Pressable>
 
           <Pressable style={{ marginTop: 20 }}>
