@@ -78,6 +78,7 @@ const stories = [
 const { setGlobalState, useGlobalState } = createGlobalState({
   modal: false,
   stories,
+  showUsers: false,
 })
 
 export { useGlobalState, setGlobalState }
