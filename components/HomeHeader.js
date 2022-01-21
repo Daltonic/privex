@@ -2,7 +2,6 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import { Avatar, Text } from 'react-native-elements'
 import { getAuth, signOut } from '../firebase'
-import { setGlobalState } from '../store'
 import { CometChat } from '@cometchat-pro/react-native-chat'
 
 const HomeHeader = () => {
@@ -46,13 +45,6 @@ const HomeHeader = () => {
         >
           <TouchableOpacity style={{ marginRight: 15 }} activeOpacity={0.5}>
             <Icon name="search" size={18} color="white" />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => setGlobalState('modal', true)}
-            activeOpacity={0.5}
-          >
-            <Icon name="users" size={18} color="white" />
           </TouchableOpacity>
         </View>
       </View>

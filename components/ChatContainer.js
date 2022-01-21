@@ -92,10 +92,7 @@ const ChatList = ({ navigation }) => {
 
     conversationsRequest
       .fetchNext()
-      .then((conversationList) => {
-        setConversations(conversationList)
-        console.log('Conversations list received:', conversationList)
-      })
+      .then((conversationList) => setConversations(conversationList))
       .catch((error) => {
         console.log('Conversations list fetching failed with error:', error)
       })

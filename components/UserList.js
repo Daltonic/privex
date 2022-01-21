@@ -8,7 +8,7 @@ import {
   ScrollView,
   useWindowDimensions,
 } from 'react-native'
-import { Avatar, Overlay } from 'react-native-elements'
+import { Avatar, Button, Overlay } from 'react-native-elements'
 import { setGlobalState, useGlobalState } from '../store'
 
 const timeAgo = (date) => {
@@ -70,12 +70,13 @@ const UserList = ({ navigation }) => {
         backgroundColor: 'white',
         justifyContent: 'center',
         alignItems: 'center',
-        minWidth: 640,
+        minWidth: viewport.width.toFixed(0) - 200,
+        maxWidth: viewport.width.toFixed(0) - 194,
       }}
     >
       <ScrollView
         style={{
-          maxHeight: viewport.height.toFixed(0) - 194,
+          maxHeight: viewport.height.toFixed(0) - 196,
           padding: 20,
           width: '100%',
         }}

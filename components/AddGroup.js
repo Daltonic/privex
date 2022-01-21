@@ -31,7 +31,7 @@ const AddGroup = () => {
         backgroundColor: 'white',
         justifyContent: 'center',
         alignItems: 'center',
-        minWidth: 320
+        minWidth: 320,
       }}
     >
       <Formik

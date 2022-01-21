@@ -100,10 +100,7 @@ const MessageContainer = ({ route }) => {
 
     messagesRequest
       .fetchPrevious()
-      .then((messages) => {
-        setMessages(messages)
-        console.log(messages)
-      })
+      .then((messages) => setMessages(messages))
       .catch((error) => {
         console.log('Message fetching failed with error:', error)
       })
