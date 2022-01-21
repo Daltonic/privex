@@ -1,14 +1,49 @@
-import React from 'react'
-import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native'
+import { CometChat } from '@cometchat-pro/react-native-chat'
+import { useEffect, useState } from 'react'
+import {
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+  TouchableOpacity,
+} from 'react-native'
 import { Avatar, Text } from 'react-native-elements'
-import { TouchableOpacity } from 'react-native-web'
 import { useGlobalState } from '../store'
+import { getAuth } from '../firebase'
 
-const ChatContainer = () => {
+const auth = getAuth()
+
+const timeAgo = (date) => {
+  let seconds = Math.floor((new Date() - date) / 1000)
+  let interval = seconds / 31536000
+
+  if (interval > 1) {
+    return Math.floor(interval) + 'yr'
+  }
+  interval = seconds / 2592000
+  if (interval > 1) {
+    return Math.floor(interval) + 'mo'
+  }
+  interval = seconds / 86400
+  if (interval > 1) {
+    return Math.floor(interval) + 'd'
+  }
+  interval = seconds / 3600
+  if (interval > 1) {
+    return Math.floor(interval) + 'h'
+  }
+  interval = seconds / 60
+  if (interval > 1) {
+    return Math.floor(interval) + 'm'
+  }
+  return Math.floor(seconds) + 's'
+}
+
+const ChatContainer = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Stories />
-      <ChatList />
+      <ChatList navigation={navigation} />
     </View>
   )
 }
@@ -45,63 +80,103 @@ const Stories = () => {
   )
 }
 
-const ChatList = () => {
+const ChatList = ({ navigation }) => {
   const viewport = useWindowDimensions()
+  const [conversations, setConversations] = useState([])
+
+  const getConversations = () => {
+    let limit = 30
+    let conversationsRequest = new CometChat.ConversationsRequestBuilder()
+      .setLimit(limit)
+      .build()
+
+    conversationsRequest
+      .fetchNext()
+      .then((conversationList) => {
+        setConversations(conversationList)
+        console.log('Conversations list received:', conversationList)
+      })
+      .catch((error) => {
+        console.log('Conversations list fetching failed with error:', error)
+      })
+  }
+
+  useEffect(() => {
+    getConversations()
+  }, [navigation])
 
   return (
     <ScrollView
       style={{
         maxHeight: viewport.height.toFixed(0) - 194,
+        minHeight: viewport.height.toFixed(0) - 194,
         marginTop: 50,
         paddingTop: 15,
       }}
       showsVerticalScrollIndicator={false}
     >
-      {Array(15)
-        .fill()
-        .map((item, i) => (
-          <TouchableOpacity
-            key={i}
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginTop: 20,
-            }}
-          >
-            <Avatar
-              size={50}
-              rounded
-              source={{
-                uri: 'https://d2qp0siotla746.cloudfront.net/img/use-cases/profile-picture/template_3.jpg',
-              }}
-            />
-
-            <View
-              style={{
-                flex: 1,
-                marginLeft: 15,
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-              }}
-            >
-              <View>
-                <Text h5 style={{ fontWeight: 700 }}>
-                  Adrian Bully
-                </Text>
-                <Text style={{ color: 'gray' }}>
-                  {'It was great hanging out today with a really long text!'.slice(
-                    0,
-                    30
-                  ) + '...'}
-                </Text>
-              </View>
-
-              <Text style={{ color: 'gray' }}>12:09</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
+      {conversations.map((conversation, index) => (
+        <Conversation
+          key={index}
+          currentUser={auth.currentUser.uid.toLowerCase()}
+          owner={conversation.lastMessage.receiverId.toLowerCase()}
+          conversation={conversation.lastMessage}
+          navigation={navigation}
+        />
+      ))}
     </ScrollView>
+  )
+}
+
+const Conversation = ({ conversation, currentUser, owner, navigation }) => {
+  const possessor = (key) => {
+    return currentUser == owner
+      ? conversation.sender[key]
+      : conversation.receiver[key]
+  }
+
+  const handleNavigation = () => {
+    navigation.navigate('ChatScreen', {
+      id: possessor('uid'),
+      name: possessor('name'),
+      avatar: possessor('avatar'),
+    })
+  }
+
+  return (
+    <TouchableOpacity
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: 20,
+      }}
+      onPress={handleNavigation}
+    >
+      <Avatar size={50} rounded source={{ uri: possessor('avatar') }} />
+
+      <View
+        style={{
+          flex: 1,
+          marginLeft: 15,
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+        }}
+      >
+        <View>
+          <Text h5 style={{ fontWeight: 700 }}>
+            {possessor('name')}
+          </Text>
+          <Text style={{ color: 'gray' }}>
+            {conversation.text.slice(0, 30) + '...'}
+          </Text>
+        </View>
+
+        <Text style={{ color: 'gray' }}>
+          {timeAgo(new Date(Number(conversation.sentAt) * 1000).getTime())}
+        </Text>
+      </View>
+    </TouchableOpacity>
   )
 }
 

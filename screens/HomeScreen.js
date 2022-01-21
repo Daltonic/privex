@@ -5,14 +5,14 @@ import FloatingButton from '../components/FloatingButton'
 import HomeHeader from '../components/HomeHeader'
 import UserList from '../components/UserList'
 
-const HomeScreen = () => {
+const HomeScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <HomeHeader />
       <AddGroup />
-      <ChatContainer />
+      <ChatContainer navigation={navigation} />
       <FloatingButton />
-      <UserList />
+      <UserList navigation={navigation} />
     </SafeAreaView>
   )
 }

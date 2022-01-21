@@ -1,3 +1,5 @@
+import { CometChat } from '@cometchat-pro/react-native-chat'
+import { useEffect, useRef, useState } from 'react'
 import {
   SafeAreaView,
   ScrollView,
@@ -8,29 +10,41 @@ import {
 } from 'react-native'
 import { Avatar, Input, Text } from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome5'
+import { getAuth } from '../firebase'
 
-const ChatScreen = () => {
+const ChatScreen = ({ navigation, route }) => {
   return (
     <SafeAreaView style={styles.container}>
-      <Header />
-      <MessageContainer />
+      <Header navigation={navigation} route={route} />
+      <MessageContainer route={route} />
     </SafeAreaView>
   )
 }
 
-const Header = () => (
+const Header = ({ navigation, route }) => (
   <View
     style={[styles.flexify, { paddingHorizontal: 15, paddingVertical: 25 }]}
   >
-    <TouchableOpacity activeOpacity={0.5}>
+    <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.5}>
       <Icon name="arrow-left" size={18} color="white" />
     </TouchableOpacity>
 
     <View style={[styles.flexify, { flex: 1, marginLeft: 15 }]}>
       <View style={styles.flexify}>
-        <Avatar rounded source={require('../assets/avatar.jpg')} />
-        <Text style={{ color: 'white', fontWeight: 600, marginLeft: 10 }}>
-          Darlington Gospel
+        <Avatar
+          rounded
+          source={{ uri: route.params.avatar }}
+          placeholderStyle={{ opacity: 0 }}
+        />
+        <Text
+          style={{
+            color: 'white',
+            fontWeight: 600,
+            marginLeft: 10,
+            textTransform: 'capitalize',
+          }}
+        >
+          {route.params.name}
         </Text>
       </View>
 
@@ -47,12 +61,78 @@ const Header = () => (
   </View>
 )
 
-const MessageContainer = () => {
+const MessageContainer = ({ route }) => {
   const viewport = useWindowDimensions()
+  const [message, setMessage] = useState('')
+  const [messages, setMessages] = useState([])
+  const scrollViewRef = useRef()
+  const auth = getAuth()
+
+  const sendMessage = () => {
+    let receiverID = route.params.id
+    let messageText = message
+    let receiverType = CometChat.RECEIVER_TYPE.USER
+    let textMessage = new CometChat.TextMessage(
+      receiverID,
+      messageText,
+      receiverType
+    )
+
+    CometChat.sendMessage(textMessage).then(
+      (message) => {
+        setMessages((prevState) => [...prevState, message])
+        setMessage('')
+        console.log('Message sent successfully:', message)
+      },
+      (error) => {
+        console.log('Message sending failed with error:', error)
+      }
+    )
+  }
+
+  const getMessages = () => {
+    let UID = route.params.id
+    let limit = 30
+    let messagesRequest = new CometChat.MessagesRequestBuilder()
+      .setUID(UID)
+      .setLimit(limit)
+      .build()
+
+    messagesRequest
+      .fetchPrevious()
+      .then((messages) => {
+        setMessages(messages)
+        console.log(messages)
+      })
+      .catch((error) => {
+        console.log('Message fetching failed with error:', error)
+      })
+  }
+
+  const listenForMessage = () => {
+    const listenerID = Math.random().toString(16).slice(2)
+    CometChat.addMessageListener(
+      listenerID,
+      new CometChat.MessageListener({
+        onTextMessageReceived: (message) => {
+          setMessages((prevState) => [...prevState, message])
+        },
+      })
+    )
+  }
+
+  useEffect(() => {
+    getMessages()
+    listenForMessage()
+  }, [route])
 
   return (
     <>
       <ScrollView
+        ref={scrollViewRef}
+        onContentSizeChange={(width, height) =>
+          scrollViewRef.current.scrollTo({ y: height })
+        }
         style={{
           backgroundColor: 'white',
           maxHeight: viewport.height.toFixed(0) - 162,
@@ -72,12 +152,14 @@ const MessageContainer = () => {
             12/01/2022
           </Text>
         </View>
-        <Message isLeft={true} />
-        <Message />
-        <Message />
-        <Message isLeft={true} />
-        <Message isLeft={true} />
-        <Message />
+        {messages.map((message, index) => (
+          <Message
+            key={index}
+            currentUser={auth.currentUser.uid.toLowerCase()}
+            owner={message.receiverId.toLowerCase()}
+            message={message}
+          />
+        ))}
       </ScrollView>
 
       <View style={[styles.flexify, styles.positAtBottom, styles.shadow]}>
@@ -97,6 +179,10 @@ const MessageContainer = () => {
           <Input
             placeholder="Write a message..."
             inputContainerStyle={{ borderBottomWidth: 0 }}
+            onSubmitEditing={() => sendMessage()}
+            onChangeText={(text) => setMessage(text)}
+            value={message}
+            inputStyle={{ fontSize: 12 }}
           />
         </View>
 
@@ -108,6 +194,7 @@ const MessageContainer = () => {
             backgroundColor: '#c5c5c5',
           }}
           activeOpacity={0.5}
+          disabled={message.length < 1}
         >
           <Icon name="arrow-right" size={12} color="black" />
         </TouchableOpacity>
@@ -116,19 +203,43 @@ const MessageContainer = () => {
   )
 }
 
-const Message = ({ isLeft }) => {
-  return isLeft ? (
+const Message = ({ message, currentUser, owner }) => {
+  const dateToTime = (date) => {
+    let hours = date.getHours()
+    let minutes = date.getMinutes()
+    let ampm = hours >= 12 ? 'pm' : 'am'
+    hours = hours % 12
+    hours = hours ? hours : 12
+    minutes = minutes < 10 ? '0' + minutes : minutes
+    let strTime = hours + ':' + minutes + ' ' + ampm
+    return strTime
+  }
+
+  return currentUser == owner ? (
     <View style={[styles.flexify, styles.spaceMsg]}>
-      <Avatar rounded source={require('../assets/avatar.jpg')} />
+      <Avatar
+        placeholderStyle={{ opacity: 0 }}
+        rounded
+        source={{ uri: message.sender.avatar }}
+      />
 
       <View style={[styles.msgBg, { marginLeft: 10 }]}>
-        <Text style={{ fontWeight: 800, fontSize: 13, color: '#4c4c4c' }}>
-          Darlington Gospel
+        <Text
+          style={{
+            fontWeight: 800,
+            fontSize: 13,
+            color: '#4c4c4c',
+            textTransform: 'capitalize',
+          }}
+        >
+          {message.sender.name}
         </Text>
         <Text style={{ fontWeight: 600, marginVertical: 5 }}>
-          Some really lengthy messages, without a shadow of doubt.
+          {message.text}
         </Text>
-        <Text style={{ fontWeight: 600 }}>12:05</Text>
+        <Text style={{ fontWeight: 600 }}>
+          {dateToTime(new Date(message.sentAt * 1000))}
+        </Text>
       </View>
     </View>
   ) : (
@@ -136,16 +247,29 @@ const Message = ({ isLeft }) => {
       <View
         style={[styles.msgBg, { backgroundColor: '#c5c5c5', marginRight: 10 }]}
       >
-        <Text style={{ fontWeight: 800, fontSize: 13, color: '#4c4c4c' }}>
-          Darlington Gospel
+        <Text
+          style={{
+            fontWeight: 800,
+            fontSize: 13,
+            color: '#4c4c4c',
+            textTransform: 'capitalize',
+          }}
+        >
+          {message.sender.name}
         </Text>
         <Text styles={{ fontWeight: 600, marginVertical: 5 }}>
-          Some really lengthy messages, without a shadow of doubt.
+          {message.text}
         </Text>
-        <Text>12:05</Text>
+        <Text style={{ fontWeight: 600 }}>
+          {dateToTime(new Date(message.sentAt * 1000))}
+        </Text>
       </View>
 
-      <Avatar rounded source={require('../assets/avatar.jpg')} />
+      <Avatar
+        placeholderStyle={{ opacity: 0 }}
+        rounded
+        source={{ uri: message.sender.avatar }}
+      />
     </View>
   )
 }
