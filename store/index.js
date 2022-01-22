@@ -76,7 +76,8 @@ const stories = [
 ]
 
 const { setGlobalState, useGlobalState } = createGlobalState({
-  modal: false,
+  isLoggedIn: false,
+  currentUser: null,
   stories,
   showUsers: false,
 })

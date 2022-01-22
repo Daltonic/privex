@@ -3,6 +3,7 @@ import Icon from 'react-native-vector-icons/FontAwesome5'
 import { Avatar, Text } from 'react-native-elements'
 import { getAuth, signOut } from '../firebase'
 import { CometChat } from '@cometchat-pro/react-native-chat'
+import { setGlobalState } from '../store'
 
 const HomeHeader = () => {
   const PLACEHOLDER_AVATAR =
@@ -14,7 +15,11 @@ const HomeHeader = () => {
     try {
       await signOut(auth).then(() => {
         CometChat.logout()
-          .then(() => console.log('Logout completed successfully'))
+          .then(() => {
+            console.log('Logout completed successfully')
+            setGlobalState('currentUser', null)
+            setGlobalState('isLoggedIn', false)
+          })
           .catch((error) =>
             console.log('Logout failed with exception:', { error })
           )

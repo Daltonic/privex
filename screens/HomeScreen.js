@@ -1,5 +1,4 @@
 import { SafeAreaView, StyleSheet } from 'react-native'
-import AddGroup from '../components/AddGroup'
 import ChatContainer from '../components/ChatContainer'
 import FloatingButton from '../components/FloatingButton'
 import HomeHeader from '../components/HomeHeader'
@@ -9,7 +8,6 @@ const HomeScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <HomeHeader />
-      <AddGroup />
       <ChatContainer navigation={navigation} />
       <FloatingButton />
       <UserList navigation={navigation} />

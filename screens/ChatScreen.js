@@ -144,11 +144,7 @@ const MessageContainer = ({ route }) => {
             justifyContent: 'center',
             marginVertical: 5,
           }}
-        >
-          <Text h6 style={{ fontWeight: 600, fontSize: 12 }}>
-            12/01/2022
-          </Text>
-        </View>
+        ></View>
         {messages.map((message, index) => (
           <Message
             key={index}
@@ -210,6 +206,13 @@ const Message = ({ message, currentUser, owner }) => {
     minutes = minutes < 10 ? '0' + minutes : minutes
     let strTime = hours + ':' + minutes + ' ' + ampm
     return strTime
+  }
+
+  const isDateToday = (date) => {
+    const today = new Date().getDate()
+    const day = new Date(date * 1000).getDate()
+
+    return today == day
   }
 
   return currentUser == owner ? (
