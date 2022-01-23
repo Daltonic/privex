@@ -105,7 +105,7 @@ const ChatList = ({ navigation }) => {
   return (
     <ScrollView
       style={{
-        minHeight: viewport.height.toFixed(0) - 193,
+        minHeight: viewport.height.toFixed(0) - 189,
         marginTop: 50,
         paddingTop: 15,
       }}

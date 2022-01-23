@@ -176,6 +176,7 @@ const MessageContainer = ({ route }) => {
             onChangeText={(text) => setMessage(text)}
             value={message}
             inputStyle={{ fontSize: 12 }}
+            autoFocus={true}
           />
         </View>
 
@@ -188,6 +189,7 @@ const MessageContainer = ({ route }) => {
           }}
           activeOpacity={0.5}
           disabled={message.length < 1}
+          onPress={() => sendMessage()}
         >
           <Icon name="arrow-right" size={12} color="black" />
         </TouchableOpacity>
